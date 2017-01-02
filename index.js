@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const ps = require('promise-streams')
 const exiftool = require('node-exiftool')
 const exiftoolBin = require('dist-exiftool')
@@ -7,11 +9,10 @@ const fs = require('fs-promise')
 const yargs = require('yargs')
 const organizeFile = require('./lib/organize-file')
 
-// Open exif process
+// Helpers for the exiftool process which will stay open the whole time
 const ep = new exiftool.ExiftoolProcess(exiftoolBin)
 const cleanup = () => ep.close()
 
-// Options
 const {
   src,
   dest,
@@ -68,12 +69,13 @@ ep.open().then(() => {
     .pipe(ps.filter((item) => !item.stats.isDirectory()))
     // No dotfiles
     .pipe(ps.filter((item) => path.basename(item.path) !== '.' && path.basename(item.path)[0] !== '.'))
-    // One at a time, go through exif data and copy to new location
+    // Exiftool can only handle one read at a time here
     .pipe(ps.through({ concurrent: 1 }, organize))
     // Pipe everything to stdout for visual progress
     .pipe(process.stdout)
-    .on('end', cleanup) // TODO: why doesnt this ever get called
-    .on('close', cleanup) // TODO: why doesnt this ever get called either
+     // TODO: why dont these ever get called
+    .on('end', cleanup)
+    .on('close', cleanup)
 
   process.on('SIGINT', cleanup)
   process.on('uncaughtException', cleanup)

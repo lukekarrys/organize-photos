@@ -3,6 +3,10 @@
   "description": "Organize my photos and videos.",
   "version": "1.0.0",
   "author": "Luke Karrys <luke@lukekarrys.com>",
+  "bin": "index.js",
+  "bugs": {
+    "url": "https://github.com/lukekarrys/organize-photos/issues"
+  },
   "dependencies": {
     "colors": "^1.1.2",
     "dateformat": "^2.0.0",
@@ -17,17 +21,22 @@
     "git-validate": "^2.2.2",
     "standard": "^8.6.0"
   },
+  "homepage": "https://github.com/lukekarrys/organize-photos#readme",
   "keywords": [
     "photos"
   ],
+  "license": "MIT",
+  "main": "index.js",
   "pre-commit": [
     "validate",
     "lint"
   ],
-  "license": "MIT",
-  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/lukekarrys/organize-photos.git"
+  },
   "scripts": {
-    "validate": "npm ls",
-    "lint": "standard"
+    "lint": "standard",
+    "validate": "npm ls"
   }
 }
