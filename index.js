@@ -13,14 +13,7 @@ const organizeFile = require('./lib/organize-file')
 const ep = new exiftool.ExiftoolProcess(exiftoolBin)
 const cleanup = () => ep.close()
 
-const {
-  src,
-  dest,
-  verbose,
-  real,
-  ext,
-  command
-} = yargs
+const argv = yargs
   .normalize('src')
   .demandOption('src')
   .describe('src', 'The directory to read from')
@@ -51,20 +44,11 @@ const {
   .argv
 
 ep.open().then(() => {
-  if (real) fs.ensureDirSync(dest)
+  if (argv.real) fs.ensureDirSync(argv.dest)
 
-  const organize = organizeFile({
-    ep,
-    ext,
-    real,
-    verbose,
-    dest,
-    command,
-    unsorted: path.join(dest, 'UNSORTED'),
-    unknown: path.join(dest, 'UNKNOWN')
-  })
+  const organize = organizeFile(Object.assign({ ep }, argv))
 
-  walk(src)
+  walk(argv.src)
     // No directories
     .pipe(ps.filter((item) => !item.stats.isDirectory()))
     // No dotfiles
