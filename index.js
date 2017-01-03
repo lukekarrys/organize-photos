@@ -24,21 +24,27 @@ const argv = yargs
   .describe('dest', 'The directory to write to')
   .coerce('dest', (arg) => path.resolve(process.cwd(), arg))
 
-  .boolean('verbose')
-  .default('verbose', false)
-
-  .boolean('real')
-  .describe('real', 'Whether to really alter the file system')
-  .default('real', false)
-
   .array('ext')
   .describe('ext', 'These extensions will be the only ones processed with exiftool')
   .default('ext', ['gif', 'jpg', 'jpeg', 'png', 'mov', 'mp4'])
   .coerce('ext', (exts) => exts.map((e) => e.toLowerCase()))
 
+  // MetadataDate is a good additional option to catch all files by the date they were added
+  .array('exifDate')
+  .describe('exifDate', 'These properties will be used in order to try and find the date from the exif data')
+  .default('exifDate', ['CreateDate'])
+  .coerce('exifDate', (dates) => ['CreateDate'].concat(dates))
+
+  .boolean('real')
+  .describe('real', 'Whether to really alter the file system')
+  .default('real', false)
+
   .describe('command', 'Which command to run on the src files')
   .default('command', 'copy')
   .choices('command', ['copy', 'move'])
+
+  .boolean('verbose')
+  .default('verbose', false)
 
   .help('help')
   .argv
