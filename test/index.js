@@ -58,15 +58,12 @@ test('(CLI) Photos can be organized by create date and modify date', (t) => {
 
   cli(src, dest, { exifDate: ['CreateDate', 'FileModifyDate'] })
     .then((files) => {
-      t.deepEqual(files, prefix([
-        '2012/11/03/2012-11-03 07-17-09.jpg',
-        '2013/01/14/2013-01-14 21-13-02 a.jpg',
-        '2013/01/14/2013-01-14 21-13-02.jpg',
-        '2016/08/14/2016-08-14 10-48-21 a.jpg',
-        '2016/08/14/2016-08-14 10-48-21.jpg',
-        '2016/11/21/2016-11-21 20-24-46.jpg',
-        'UNKNOWN/test.txt'
-      ], cwd, dest))
+      t.equal(files[0], path.join(cwd, dest, '2012/11/03/2012-11-03 07-17-09.jpg'))
+      t.equal(files[files.length - 1], path.join(cwd, dest, 'UNKNOWN/test.txt'))
+      files.slice(1, -1).forEach((f) => {
+        t.equal(f.indexOf('UNSORTED'), -1)
+        t.equal(f.indexOf('UNKNOWN'), -1)
+      })
       t.end()
     })
     .catch(noError)
@@ -109,14 +106,12 @@ test('(Module) Photos can be organized by create date and modify date', (t) => {
     .then((resp) => {
       t.deepEqual(Object.keys(resp), ['SUCCESS', 'UNKNOWN'])
 
-      t.deepEqual(resp.SUCCESS.map(({ dest }) => dest), prefix([
-        '2012/11/03/2012-11-03 07-17-09.jpg',
-        '2013/01/14/2013-01-14 21-13-02 a.jpg',
-        '2013/01/14/2013-01-14 21-13-02.jpg',
-        '2016/08/14/2016-08-14 10-48-21 a.jpg',
-        '2016/08/14/2016-08-14 10-48-21.jpg',
-        '2016/11/21/2016-11-21 20-24-46.jpg'
-      ], cwd, dest))
+      t.deepEqual(resp.SUCCESS[0].dest, path.join(cwd, dest, '2012/11/03/2012-11-03 07-17-09.jpg'))
+
+      resp.SUCCESS.slice(1).forEach((f) => {
+        t.equal(f.dest.indexOf('UNSORTED'), -1)
+        t.equal(f.dest.indexOf('UNKNOWN'), -1)
+      })
 
       t.deepEqual(resp.UNKNOWN.map(({ dest }) => dest), prefix([
         'UNKNOWN/test.txt'
