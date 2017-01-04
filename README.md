@@ -25,15 +25,16 @@ npm install @lukekarrys/organize-photos --save
 1. Takes a `src` dir and copies *everything* to a `dest` dir
 1. Every file copied is cleaned up with the following
     1. Lowercase file extension
-    2. Removes trailing ` #5` and ` (3)` from filenames
+    1. Removes trailing ` #5` and ` (3)` from filenames
 1. If a file is not a recognized type it is moved to `dest/UNKNOWN`
 1. If a file has no date associated, it is moved to `dest/UNSORTED`
 1. If a file does have a date, it is moved to `dest/yyyy/mm/dd/yyyy-mm-dd hh:mm:ss.ext`
 1. Dates are found by the following
     1. exif `CreateDate` field
-    2. Any other exif fields passed in with `exifDate`
-    3. Some special filenames like screenshots or photobooth files
-    4. A parent directory of the file that looks like `yyyy-mm-dd hh?:mm?:ss?`
+    1. Any other exif fields passed in with `exifDate`
+    1. Some special filenames like screenshots or photobooth files
+    1. If the file is named like `yyyy-mm-dd hh?:mm?:ss?`
+    1. A parent directory that is named like `yyyy-mm-dd hh?:mm?:ss?`
 1. If no exif dates are found, but a date is found from the path, that will be written to exif data
 1. Files are never clobbered but instead `a-z` is appended to the destination until there are no conflicts
 1. By default, everything is a dry run (can be changed with `real`)

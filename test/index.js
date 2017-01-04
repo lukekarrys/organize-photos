@@ -9,14 +9,25 @@ const organize = require('../lib/index')
 const prefix = (f, ...prefixes) => path.join(process.cwd(), ...prefixes, f)
 const prefixFiles = (files, ...prefixes) => files.map((f) => prefix(f, ...prefixes))
 
+const destOnly = (obj) => Object.keys(obj).reduce((acc, k) => {
+  acc[k] = obj[k].map(({ dest }) => dest)
+  return acc
+}, {})
+
+const getFsDest = (dest) => prefixFiles(fs.walkSync(dest)).sort((a, b) => {
+  if (a < b) return -1
+  if (a > b) return 1
+  return 0
+})
+
 const run = (src, dest, options) => organize(
   Object.assign({ src, dest, log: debug, clean: true, real: true, verbose: true }, options)
-)
+).then((resp) => ({ resp, files: getFsDest(dest) }))
 
 const cli = (src, dest, ...args) => {
   const promise = spawn('./lib/cli.js', ['--src', src, '--dest', dest, '--clean', '--real', '--verbose', ...args])
   promise.childProcess.stdout.on('data', (data) => debug(data.toString()))
-  return promise.then(() => prefixFiles(fs.walkSync(dest)).sort())
+  return promise.then(() => getFsDest(dest))
 }
 
 const noError = (t) => (err) => {
@@ -33,6 +44,7 @@ test('(CLI) Photos can be organized by create date', (t) => {
       const expected = [
         '2012/11/03/2012-11-03 07-17-09.jpg',
         '2013/11/01/2013-11-01 17-33-56.png',
+        '2016/01/01/2016-01-01 12-22-45 a.jpg',
         '2016/01/01/2016-01-01 12-22-45.jpg',
         '2016/11/21/2016-11-21 20-24-00.jpg',
         'UNKNOWN/test.txt',
@@ -74,27 +86,33 @@ test('(Module) Photos can be organized by create date and have exif modified', (
   const dest = 'test/output'
 
   run(src, dest)
-    .then((resp) => {
-      t.deepEqual(Object.keys(resp).sort(), ['SUCCESS', 'UNKNOWN', 'UNSORTED'])
+    .then(({ resp, files }) => {
+      const destResp = destOnly(resp)
 
-      t.deepEqual(resp.SUCCESS.map(({ dest }) => dest), prefixFiles([
-        '2012/11/03/2012-11-03 07-17-09.jpg',
-        '2013/11/01/2013-11-01 17-33-56.png',
-        '2016/01/01/2016-01-01 12-22-45.jpg',
-        '2016/11/21/2016-11-21 20-24-00.jpg'
-      ], dest))
+      t.deepEqual(Object.keys(destResp).sort(), ['SUCCESS', 'UNKNOWN', 'UNSORTED'])
 
-      t.deepEqual(resp.UNKNOWN.map(({ dest }) => dest), prefixFiles([
-        'UNKNOWN/test.txt'
-      ], dest))
+      const expected = {
+        SUCCESS: prefixFiles([
+          '2012/11/03/2012-11-03 07-17-09.jpg',
+          '2013/11/01/2013-11-01 17-33-56.png',
+          '2016/01/01/2016-01-01 12-22-45 a.jpg',
+          '2016/01/01/2016-01-01 12-22-45.jpg',
+          '2016/11/21/2016-11-21 20-24-00.jpg'
+        ], dest),
+        UNKNOWN: prefixFiles([
+          'UNKNOWN/test.txt'
+        ], dest),
+        UNSORTED: prefixFiles([
+          'UNSORTED/IMG_0415 a.jpg',
+          'UNSORTED/IMG_0415.jpg',
+          'UNSORTED/IMG_6412 a.jpg',
+          'UNSORTED/IMG_6412.jpg',
+          'UNSORTED/Photo on.jpg'
+        ], dest)
+      }
 
-      t.deepEqual(resp.UNSORTED.map(({ dest }) => dest), prefixFiles([
-        'UNSORTED/IMG_0415 a.jpg',
-        'UNSORTED/IMG_0415.jpg',
-        'UNSORTED/IMG_6412 a.jpg',
-        'UNSORTED/IMG_6412.jpg',
-        'UNSORTED/Photo on.jpg'
-      ], dest))
+      t.deepEqual(destResp, expected)
+      t.deepEqual(files, [...expected.SUCCESS, ...expected.UNKNOWN, ...expected.UNSORTED])
 
       return resp
     })
@@ -105,6 +123,7 @@ test('(Module) Photos can be organized by create date and have exif modified', (
     .then(({ resp, ep }) => {
       const exifFiles = [
         '2013/11/01/2013-11-01 17-33-56.png',
+        '2016/01/01/2016-01-01 12-22-45 a.jpg',
         '2016/01/01/2016-01-01 12-22-45.jpg',
         '2016/11/21/2016-11-21 20-24-00.jpg'
       ].map((f) => resp.SUCCESS.find((r) => r.dest.endsWith(f)))
@@ -124,7 +143,7 @@ test('(Module) Photos can be organized by create date and have exif modified', (
     })
     .then((resp) => {
       resp.forEach((item) => {
-        const date = path.basename(item.dest.FileName, path.extname(item.dest.FileName)).replace(/-/g, ':')
+        const date = path.basename(item.dest.FileName, path.extname(item.dest.FileName)).replace(/-/g, ':').replace(/ [a-z]+$/, '')
         t.notOk(item.src.CreateDate)
         t.equal(item.dest.CreateDate, date)
       })
@@ -138,17 +157,19 @@ test('(Module) Photos can be organized by create date and modify date', (t) => {
   const dest = 'test/output'
 
   run(src, dest, { exifDate: ['CreateDate', 'FileModifyDate'] })
-    .then((resp) => {
-      t.deepEqual(Object.keys(resp), ['SUCCESS', 'UNKNOWN'])
+    .then(({ resp, files }) => {
+      const destResp = destOnly(resp)
 
-      t.deepEqual(resp.SUCCESS[0].dest, prefix('2012/11/03/2012-11-03 07-17-09.jpg', dest))
+      t.deepEqual(Object.keys(destResp).sort(), ['SUCCESS', 'UNKNOWN'])
+      t.deepEqual(files, [...destResp.SUCCESS, ...destResp.UNKNOWN])
+      t.deepEqual(destResp.SUCCESS[0], prefix('2012/11/03/2012-11-03 07-17-09.jpg', dest))
 
-      resp.SUCCESS.slice(1).forEach((f) => {
-        t.equal(f.dest.indexOf('UNSORTED'), -1)
-        t.equal(f.dest.indexOf('UNKNOWN'), -1)
+      destResp.SUCCESS.slice(1).forEach((f) => {
+        t.equal(f.indexOf('UNSORTED'), -1)
+        t.equal(f.indexOf('UNKNOWN'), -1)
       })
 
-      t.deepEqual(resp.UNKNOWN.map(({ dest }) => dest), prefixFiles([
+      t.deepEqual(destResp.UNKNOWN, prefixFiles([
         'UNKNOWN/test.txt'
       ], dest))
 
