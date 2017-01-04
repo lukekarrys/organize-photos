@@ -12,7 +12,7 @@
     "colors": "^1.1.2",
     "dateformat": "^2.0.0",
     "debug": "^2.6.0",
-    "dist-exiftool": "^10.33.0",
+    "dist-exiftool": "^10.33.1",
     "fs-promise": "^1.0.0",
     "klaw": "^1.3.1",
     "node-exiftool": "^2.1.1",
@@ -34,6 +34,7 @@
   "license": "MIT",
   "main": "lib/index.js",
   "pre-commit": [
+    "validate",
     "lint",
     "test"
   ],
@@ -43,6 +44,7 @@
   },
   "scripts": {
     "lint": "standard",
-    "test": "tape test/index.js | tap-spec"
+    "test": "NODE_ENV=test tape test/index.js | tap-spec",
+    "validate": "npm ls"
   }
 }
