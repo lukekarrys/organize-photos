@@ -34,7 +34,6 @@
   "license": "MIT",
   "main": "lib/index.js",
   "pre-commit": [
-    "validate",
     "lint",
     "test"
   ],
@@ -44,7 +43,6 @@
   },
   "scripts": {
     "lint": "standard",
-    "test": "tape test/index.js | tap-spec",
-    "validate": "npm ls"
+    "test": "tape test/index.js | tap-spec"
   }
 }
