@@ -40,6 +40,7 @@ test('(CLI) Photos can be organized by create date', (t) => {
     .then((files) => {
       t.deepEqual(files, prefix([
         '2012/11/03/2012-11-03 07-17-09.jpg',
+        '2016/11/21/2016-11-21 20-24-00.jpg',
         'UNKNOWN/test.txt',
         'UNSORTED/IMG_0415 a.jpg',
         'UNSORTED/IMG_0415.jpg',
@@ -63,6 +64,7 @@ test('(CLI) Photos can be organized by create date and modify date', (t) => {
         '2013/01/14/2013-01-14 21-13-02.jpg',
         '2016/08/14/2016-08-14 10-48-21 a.jpg',
         '2016/08/14/2016-08-14 10-48-21.jpg',
+        '2016/11/21/2016-11-21 20-24-46.jpg',
         'UNKNOWN/test.txt'
       ], cwd, dest))
       t.end()
@@ -79,7 +81,8 @@ test('(Module) Photos can be organized by create date', (t) => {
       t.deepEqual(Object.keys(resp), ['SUCCESS', 'UNKNOWN', 'UNSORTED'])
 
       t.deepEqual(resp.SUCCESS.map(({ dest }) => dest), prefix([
-        '2012/11/03/2012-11-03 07-17-09.jpg'
+        '2012/11/03/2012-11-03 07-17-09.jpg',
+        '2016/11/21/2016-11-21 20-24-00.jpg'
       ], cwd, dest))
 
       t.deepEqual(resp.UNKNOWN.map(({ dest }) => dest), prefix([
@@ -111,7 +114,8 @@ test('(Module) Photos can be organized by create date and modify date', (t) => {
         '2013/01/14/2013-01-14 21-13-02 a.jpg',
         '2013/01/14/2013-01-14 21-13-02.jpg',
         '2016/08/14/2016-08-14 10-48-21 a.jpg',
-        '2016/08/14/2016-08-14 10-48-21.jpg'
+        '2016/08/14/2016-08-14 10-48-21.jpg',
+        '2016/11/21/2016-11-21 20-24-46.jpg'
       ], cwd, dest))
 
       t.deepEqual(resp.UNKNOWN.map(({ dest }) => dest), prefix([

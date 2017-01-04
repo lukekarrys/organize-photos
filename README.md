@@ -1,6 +1,18 @@
 organize-photos
 ======================
 
-## TODO
+## Install
 
-- Save exif date data for files called `Photo on DATE`
+**CLI**
+```
+npm install @lukekarrys/organize-photos -g
+```
+
+**Module**
+```
+npm install @lukekarrys/organize-photos --save
+```
+
+### LICENSE
+
+MIT
