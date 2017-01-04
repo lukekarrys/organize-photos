@@ -3,6 +3,7 @@ const test = require('tape')
 const fs = require('fs-promise')
 const debug = require('debug')('organize-photos')
 const spawn = require('child-process-promise').spawn
+const exiftool = require('../lib/exiftool')
 const organize = require('../lib/index')
 
 const prefix = (f, ...prefixes) => path.join(process.cwd(), ...prefixes, f)
@@ -48,7 +49,7 @@ test('(CLI) Photos can be organized by create date', (t) => {
 
       t.end()
     })
-    .catch(noError)
+    .catch(noError(t))
 })
 
 test('(CLI) Photos can be organized by create date and modify date', (t) => {
@@ -65,10 +66,10 @@ test('(CLI) Photos can be organized by create date and modify date', (t) => {
       })
       t.end()
     })
-    .catch(noError)
+    .catch(noError(t))
 })
 
-test('(Module) Photos can be organized by create date', (t) => {
+test('(Module) Photos can be organized by create date and have exif modified', (t) => {
   const src = 'test/fixtures'
   const dest = 'test/output'
 
@@ -95,9 +96,41 @@ test('(Module) Photos can be organized by create date', (t) => {
         'UNSORTED/Photo on.jpg'
       ], dest))
 
+      return resp
+    })
+    .then((resp) => {
+      const ep = exiftool()
+      return ep.open().then(() => ({ resp, ep }))
+    })
+    .then(({ resp, ep }) => {
+      const exifFiles = [
+        '2013/11/01/2013-11-01 17-33-56.png',
+        '2016/01/01/2016-01-01 12-22-45.jpg',
+        '2016/11/21/2016-11-21 20-24-00.jpg'
+      ].map((f) => resp.SUCCESS.find((r) => r.dest.endsWith(f)))
+
+      const readPromises = exifFiles.map(({ src, dest }) => Promise.all([
+        ep.readMetadata(src),
+        ep.readMetadata(dest)
+      ]).then((parts) => ({
+        src: parts[0].data[0],
+        dest: parts[1].data[0]
+      })))
+
+      return Promise.all(readPromises).then((resp) => {
+        ep.close()
+        return resp
+      })
+    })
+    .then((resp) => {
+      resp.forEach((item) => {
+        const date = path.basename(item.dest.FileName, path.extname(item.dest.FileName)).replace(/-/g, ':')
+        t.notOk(item.src.CreateDate)
+        t.equal(item.dest.CreateDate, date)
+      })
       t.end()
     })
-    .catch(noError)
+    .catch(noError(t))
 })
 
 test('(Module) Photos can be organized by create date and modify date', (t) => {
@@ -121,5 +154,5 @@ test('(Module) Photos can be organized by create date and modify date', (t) => {
 
       t.end()
     })
-    .catch(noError)
+    .catch(noError(t))
 })
