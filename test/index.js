@@ -44,14 +44,18 @@ test('(CLI) Photos can be organized by create date', (t) => {
       const expected = [
         '2012/11/03/2012-11-03 07-17-09.jpg',
         '2013/11/01/2013-11-01 17-33-56.png',
-        '2016/01/01/2016-01-01 12-22-45 a.jpg',
+        '2016/01/01/2016-01-01 12-22-45 1.jpg',
         '2016/01/01/2016-01-01 12-22-45.jpg',
         '2016/11/21/2016-11-21 20-24-00.jpg',
         'UNKNOWN/test.txt',
-        'UNSORTED/IMG_0415 a.jpg',
+        'UNSORTED/IMG_0415 1.jpg',
         'UNSORTED/IMG_0415.jpg',
-        'UNSORTED/IMG_6412 a.jpg',
+        'UNSORTED/IMG_6412 1.jpg',
         'UNSORTED/IMG_6412.jpg',
+        'UNSORTED/Photo on 1.jpg',
+        'UNSORTED/Photo on 2.jpg',
+        'UNSORTED/Photo on 3.jpg',
+        'UNSORTED/Photo on 4.jpg',
         'UNSORTED/Photo on.jpg'
       ]
 
@@ -89,13 +93,15 @@ test('(Module) Photos can be organized by create date and have exif modified', (
     .then(({ resp, files }) => {
       const destResp = destOnly(resp)
 
-      t.deepEqual(Object.keys(destResp).sort(), ['SUCCESS', 'UNKNOWN', 'UNSORTED'])
+      t.deepEqual(Object.keys(destResp).sort(), ['SUCCESS', 'SUCCESS_METADATA', 'UNKNOWN', 'UNSORTED'])
 
       const expected = {
         SUCCESS: prefixFiles([
-          '2012/11/03/2012-11-03 07-17-09.jpg',
+          '2012/11/03/2012-11-03 07-17-09.jpg'
+        ], dest),
+        SUCCESS_METADATA: prefixFiles([
           '2013/11/01/2013-11-01 17-33-56.png',
-          '2016/01/01/2016-01-01 12-22-45 a.jpg',
+          '2016/01/01/2016-01-01 12-22-45 1.jpg',
           '2016/01/01/2016-01-01 12-22-45.jpg',
           '2016/11/21/2016-11-21 20-24-00.jpg'
         ], dest),
@@ -103,16 +109,20 @@ test('(Module) Photos can be organized by create date and have exif modified', (
           'UNKNOWN/test.txt'
         ], dest),
         UNSORTED: prefixFiles([
-          'UNSORTED/IMG_0415 a.jpg',
+          'UNSORTED/IMG_0415 1.jpg',
           'UNSORTED/IMG_0415.jpg',
-          'UNSORTED/IMG_6412 a.jpg',
+          'UNSORTED/IMG_6412 1.jpg',
           'UNSORTED/IMG_6412.jpg',
+          'UNSORTED/Photo on 1.jpg',
+          'UNSORTED/Photo on 2.jpg',
+          'UNSORTED/Photo on 3.jpg',
+          'UNSORTED/Photo on 4.jpg',
           'UNSORTED/Photo on.jpg'
         ], dest)
       }
 
       t.deepEqual(destResp, expected)
-      t.deepEqual(files, [...expected.SUCCESS, ...expected.UNKNOWN, ...expected.UNSORTED])
+      t.deepEqual(files, [...expected.SUCCESS, ...expected.SUCCESS_METADATA, ...expected.UNKNOWN, ...expected.UNSORTED])
 
       return resp
     })
@@ -121,14 +131,7 @@ test('(Module) Photos can be organized by create date and have exif modified', (
       return ep.open().then(() => ({ resp, ep }))
     })
     .then(({ resp, ep }) => {
-      const exifFiles = [
-        '2013/11/01/2013-11-01 17-33-56.png',
-        '2016/01/01/2016-01-01 12-22-45 a.jpg',
-        '2016/01/01/2016-01-01 12-22-45.jpg',
-        '2016/11/21/2016-11-21 20-24-00.jpg'
-      ].map((f) => resp.SUCCESS.find((r) => r.dest.endsWith(f)))
-
-      const readPromises = exifFiles.map(({ src, dest }) => Promise.all([
+      const readPromises = resp.SUCCESS_METADATA.map(({ src, dest }) => Promise.all([
         ep.readMetadata(src),
         ep.readMetadata(dest)
       ]).then((parts) => ({
@@ -143,7 +146,7 @@ test('(Module) Photos can be organized by create date and have exif modified', (
     })
     .then((resp) => {
       resp.forEach((item) => {
-        const date = path.basename(item.dest.FileName, path.extname(item.dest.FileName)).replace(/-/g, ':').replace(/ [a-z]+$/, '')
+        const date = path.basename(item.dest.FileName, path.extname(item.dest.FileName)).replace(/-/g, ':').replace(/ \d+$/, '')
         t.notOk(item.src.CreateDate)
         t.equal(item.dest.CreateDate, date)
       })
