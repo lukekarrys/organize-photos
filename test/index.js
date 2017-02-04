@@ -10,7 +10,9 @@ const prefix = (f, ...prefixes) => path.join(process.cwd(), ...prefixes, f)
 const prefixFiles = (files, ...prefixes) => files.map((f) => prefix(f, ...prefixes))
 
 const destOnly = (obj) => Object.keys(obj).reduce((acc, k) => {
-  acc[k] = obj[k].map(({ dest }) => dest)
+  if (Array.isArray(obj[k])) {
+    acc[k] = obj[k].map(({ dest }) => dest)
+  }
   return acc
 }, {})
 
@@ -93,6 +95,12 @@ test('(Module) Photos can be organized by create date and have exif modified', (
     .then(({ resp, files }) => {
       const destResp = destOnly(resp)
 
+      t.deepEqual(resp.METADATA, {
+        SUCCESS: { dest: '2016-11-21 20-24-00.jpg', src: 'Photo on 11-21-16 at 8.24 PM #4 (1).jpg' },
+        UNKNOWN: { dest: 'test.txt', src: 'test.txt' },
+        UNSORTED: { dest: 'Photo on.jpg', src: 'Photo on #4 (1) aaa.jpg' }
+      })
+
       t.deepEqual(Object.keys(destResp).sort(), ['SUCCESS', 'SUCCESS_METADATA', 'UNKNOWN', 'UNSORTED'])
 
       const expected = {
@@ -147,8 +155,8 @@ test('(Module) Photos can be organized by create date and have exif modified', (
     .then((resp) => {
       resp.forEach((item) => {
         const date = path.basename(item.dest.FileName, path.extname(item.dest.FileName)).replace(/-/g, ':').replace(/ \d+$/, '')
-        t.notOk(item.src.CreateDate)
-        t.equal(item.dest.CreateDate, date)
+        t.notOk(item.src.CreationDate)
+        t.equal(item.dest.CreationDate, date)
       })
       t.end()
     })
