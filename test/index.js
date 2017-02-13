@@ -1,6 +1,6 @@
 const path = require('path')
 const test = require('tape')
-const fs = require('fs-promise')
+const walk = require('klaw')
 const debug = require('debug')('organize-photos')
 const spawn = require('child-process-promise').spawn
 const exiftool = require('../lib/exiftool')
@@ -16,15 +16,27 @@ const destOnly = (obj) => Object.keys(obj).reduce((acc, k) => {
   return acc
 }, {})
 
-const getFsDest = (dest) => prefixFiles(fs.walkSync(dest)).sort((a, b) => {
+const pathSorter = (a, b) => {
   if (a < b) return -1
   if (a > b) return 1
   return 0
-})
+}
+
+const getFsDest = (dest) => {
+  const items = []
+  return new Promise((resolve, reject) => walk(dest)
+    .on('data', (item) => {
+      const isDir = item.stats.isDirectory()
+      const isHidden = path.basename(item.path) === '.' || path.basename(item.path)[0] === '.'
+      if (!isDir && !isHidden) items.push(item.path)
+    })
+    .on('end', () => resolve(items.sort(pathSorter)))
+  )
+}
 
 const run = (src, dest, options) => organize(
   Object.assign({ src, dest, log: debug, clean: true, real: true, verbose: true }, options)
-).then((resp) => ({ resp, files: getFsDest(dest) }))
+).then((resp) => getFsDest(dest).then((files) => ({ resp, files })))
 
 const cli = (src, dest, ...args) => {
   const promise = spawn('./lib/cli.js', ['--src', src, '--dest', dest, '--clean', '--real', '--verbose', ...args])
