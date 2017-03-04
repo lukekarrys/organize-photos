@@ -18,7 +18,7 @@
     "node-exiftool": "^2.1.1",
     "promise-streams": "^1.0.1",
     "single-line-log": "^1.1.2",
-    "yargs": "^6.6.0"
+    "yargs": "^7.0.1"
   },
   "devDependencies": {
     "child-process-promise": "^2.2.0",
