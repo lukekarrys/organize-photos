@@ -1,6 +1,8 @@
 organize-photos
 ======================
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/lukekarrys/organize-photos.svg)](https://greenkeeper.io/)
+
 Organize my photos and videos.
 
 [![NPM](https://nodei.co/npm/@lukekarrys/organize-photos.png)](https://nodei.co/npm/@lukekarrys/organize-photos/)
