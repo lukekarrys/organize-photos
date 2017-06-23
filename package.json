@@ -23,7 +23,6 @@
   "devDependencies": {
     "child-process-promise": "^2.2.0",
     "git-validate": "^2.2.2",
-    "greenkeeper-postpublish": "^1.0.1",
     "standard": "^10.0.2",
     "tap-spec": "^4.1.1",
     "tape": "^4.6.3"
@@ -46,7 +45,6 @@
   "scripts": {
     "lint": "standard",
     "test": "NODE_ENV=test tape test/index.js | tap-spec",
-    "validate": "echo 'this is fine'",
-    "postpublish": "greenkeeper-postpublish"
+    "validate": "echo 'this is fine'"
   }
 }
