@@ -10,7 +10,7 @@
   "dependencies": {
     "boxen": "^1.2.1",
     "colors": "^1.1.2",
-    "dateformat": "^2.0.0",
+    "dateformat": "^3.0.0",
     "debug": "^3.0.0",
     "dist-exiftool": "^10.53.0",
     "fs-promise": "^2.0.3",
