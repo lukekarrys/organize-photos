@@ -1,7 +1,7 @@
 {
   "name": "@lukekarrys/organize-photos",
   "description": "Organize my photos and videos.",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "author": "Luke Karrys <luke@lukekarrys.com>",
   "bin": "lib/cli.js",
   "bugs": {
