@@ -1,27 +1,13 @@
-organize-photos
-======================
+# organize-photos
 
-Organize my photos and videos.
+Organizes your photos and videos.
 
 [![NPM](https://nodei.co/npm/@lukekarrys/organize-photos.png)](https://nodei.co/npm/@lukekarrys/organize-photos/)
 [![Build Status](https://travis-ci.org/lukekarrys/organize-photos.png?branch=master)](https://travis-ci.org/lukekarrys/organize-photos)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 [![Greenkeeper badge](https://badges.greenkeeper.io/lukekarrys/organize-photos.svg)](https://greenkeeper.io/)
 
-
-## Install
-
-**CLI**
-```
-npm install @lukekarrys/organize-photos -g
-```
-
-**Module**
-```
-npm install @lukekarrys/organize-photos --save
-```
-
-## What does this do?
+## Overview
 
 1. Takes a `src` dir and copies *everything* to a `dest` dir
 1. Every file copied is cleaned up with the following
@@ -42,7 +28,45 @@ npm install @lukekarrys/organize-photos --save
 1. By default, `dest` is never cleared but always added to (can be changed with `clean`)
 1. Can optionally `move` all the files instead
 
+## Installation
 
-### LICENSE
+### CLI
+```
+npm install @lukekarrys/organize-photos -g
+```
+
+### Module
+```
+npm install @lukekarrys/organize-photos --save
+```
+
+## Development
+
+### Prerequisites
+
+#### Windows
+
+##### win-node-env
+
+On Windows, you will encounter the error "'NODE_ENV' is not recognized as an internal or external command, operable program or batch file." when running npm scripts. 
+
+[win-node-env](https://github.com/laggingreflex/win-node-env) creates a NODE_ENV.cmd that sets the NODE_ENV environment variable and spawns a child process with the rest of the command and its args.
+
+`npm install -g win-node-env`
+
+## Testing
+
+`npm test`
+
+### License
 
 MIT
+
+## Contributors
+
+### Brendan Conrad
+
+* GitHub - <https://github.com/brencon>
+* Twitter - <https://twitter.com/symBrendan>
+
+
